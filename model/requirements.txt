@@ -1,0 +1,4 @@
+python-dotenv
+langchain
+google-generativeai
+langchain-google-genai
