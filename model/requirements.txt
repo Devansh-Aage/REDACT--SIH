@@ -2,3 +2,8 @@ python-dotenv
 langchain
 google-generativeai
 langchain-google-genai
+opencv-python
+pytesseract
+spacy
+PyMuPDF
+flask
