@@ -1,7 +1,6 @@
-const connectToMongo = require("./db");
+const connectToMongo = require("./db.js");
 const express = require("express");
-const mongoose = require("mongoose");
-var cors = require("cors");
+const cors = require("cors");
 
 connectToMongo();
 
@@ -11,10 +10,8 @@ const port = 5000 || process.env.PORT;
 app.use(cors());
 app.use(express.json());
 
-
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/files", require("./routes/files"));
-// app.use('/api/products', require('./routes/products'))
+app.use("/api/auth", require("./routes/auth.js"));
+app.use("/api/files", require("./routes/files.js"));
 
 app.listen(port, () => {
   console.log(`Redact App listening on port ${port}`);

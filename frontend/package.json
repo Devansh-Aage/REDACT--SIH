@@ -11,8 +11,6 @@
     "start": "react-scripts start"
   },
   "dependencies": {
-    "@splinetool/react-spline": "^0.0.0",
-    "@splinetool/runtime": "^1.9.21",
     "ajv": "^8.0.0",
     "ajv-keywords": "^5.0.0",
     "lucide": "^0.433.0",
