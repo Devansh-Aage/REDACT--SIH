@@ -1,4 +1,6 @@
 from flask import Flask, request, send_from_directory, jsonify
+from flask import make_response, send_file
+import io
 import os
 import cv2
 import pytesseract
@@ -21,7 +23,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(REDACTED_FOLDER, exist_ok=True)
 
 # Load spaCy's English NLP model
-nlp = spacy.load("../PDF/model-best")
+nlp = spacy.load("model-best")
 
 # Define a regex pattern for email addresses
 email_pattern = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
@@ -43,14 +45,16 @@ def redact_image_entities(image_path, entities_to_redact):
     full_text = " ".join([data['text'][i] for i in range(len(data['text'])) if int(data['conf'][i]) > 60])
     
     image_doc = nlp(full_text)
-
     redacted_words = []
     for ent in image_doc.ents:
+        print("Ent Label: ",ent.label_)
+        print("Ent to Redact: ",entities_to_redact)
         if ent.label_ in entities_to_redact:
+
             redacted_words.extend(ent.text.split())
 
     image_redacted_words = redacted_words  # Store globally
-
+    print(image_redacted_words)
     n_boxes = len(data['text'])
     for i in range(n_boxes):
         if int(data['conf'][i]) > 60:
@@ -151,13 +155,35 @@ def redact_pdf_with_black_fill(input_pdf_path, exclude_words):
     return final_redacted_path
 
 
+# @app.route('/redact_image', methods=['POST'])
+# def redact_image_route():
+#     if 'file' not in request.files or 'entities' not in request.form:
+#         return jsonify({"error": "No file or entities provided"}), 400
+
+#     file = request.files['file']
+#     entities = request.form.get('entities',[])
+
+#     if file.filename == '':
+#         return jsonify({"error": "No file selected"}), 400
+
+#     filename = file.filename
+#     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#     file.save(file_path)
+
+#     redacted_image_path, redacted_words = redact_image_entities(file_path, entities)
+
+#     return jsonify({
+#         "redacted_image": redacted_image_path,
+#         "redacted_words": redacted_words
+#     })
+
 @app.route('/redact_image', methods=['POST'])
 def redact_image_route():
     if 'file' not in request.files or 'entities' not in request.form:
         return jsonify({"error": "No file or entities provided"}), 400
 
     file = request.files['file']
-    entities = request.form.get('entities',[])
+    entities = request.form.get('entities',[])  # Get entities as a list
 
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
@@ -166,12 +192,20 @@ def redact_image_route():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
 
+    # Get redacted image and words
     redacted_image_path, redacted_words = redact_image_entities(file_path, entities)
 
-    return jsonify({
-        "redacted_image": redacted_image_path,
-        "redacted_words": redacted_words
-    })
+    # Read the image file
+    with open(redacted_image_path, 'rb') as img_file:
+        img_data = io.BytesIO(img_file.read())
+
+    # Create a response with the image attachment and redacted words
+    response = make_response(send_file(img_data, mimetype='image/jpeg', as_attachment=True, download_name=os.path.basename(redacted_image_path)))
+
+    # Attach redacted words as a header (or you could include them in a separate response part)
+    response.headers['Redacted-Words'] = ','.join(redacted_words)
+
+    return response
 
 @app.route('/confirm_image_redaction', methods=['POST'])
 def confirm_image_redaction():
