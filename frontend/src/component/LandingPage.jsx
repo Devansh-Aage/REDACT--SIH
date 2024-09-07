@@ -9,7 +9,6 @@ import Footer from './Footer'
 function LandingPage() {
     return (
         <div>
-            <Navbar />
             <Hero />
             <Info />
             <About />
