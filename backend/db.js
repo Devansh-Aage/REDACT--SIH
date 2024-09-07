@@ -1,12 +1,17 @@
-require('dotenv').config()
-const mongoose = require('mongoose');
-const mongoURI=process.env.MONGO_URI
+require("dotenv").config();
+const mongoose = require("mongoose");
 
+const mongoURI = process.env.MONGO_URI;
 
-const connectToMongo=async()=>{
-    mongoose.connect(mongoURI)
-    .then(()=>{console.log("success")})
-    .catch((err)=>{console.log(err)});
-}
+const connectToMongo = async () => {
+  mongoose
+    .connect(mongoURI)
+    .then(() => {
+      console.log("success");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
 
-module.exports=connectToMongo;
+module.exports = connectToMongo;
