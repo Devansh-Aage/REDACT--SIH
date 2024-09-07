@@ -55,9 +55,10 @@ router.post(
 
     const key = crypto.randomBytes(32);
     console.log(req.file);
-    
+
     try {
       let formData = new FormData();
+      let success = false;
       // Read the file from disk
       const filePath = path.join(__dirname, "..", req.file.path);
 
@@ -77,7 +78,7 @@ router.post(
       const response = await pinata.upload.base64(encryptedbase64String);
 
       // const IPFSHash = await response.data.IpfsHash;
-      console.log(response);
+      console.log(response.data);
 
       let file = await File.findOne({ encryptionkey: key });
       if (file) {
@@ -89,17 +90,17 @@ router.post(
       file = await File.create({
         user: req.user.id,
         encryptionkey: key,
-        ipfsCID: response.cid,
-        mimeType:req.file.mimetype,
-        filename:req.file.originalname,
+        ipfsCID: response.data.cid,
+        mimeType: req.file.mimetype,
+        filename: req.file.originalname,
       });
 
       // Delete the file from the upload folder
       await fs.unlink(filePath);
       console.log("File deleted");
-
+      success = true;
       res.status(200).json({
-        buffer,
+        success,
       });
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -111,18 +112,20 @@ router.post(
 );
 
 // Add this new route to retrieve a file using its CID
-router.get("/retrieve/:cid", fetchuser, async (req, res) => {
+router.get("/retrieve/:cid", async (req, res) => {
   const { cid } = req.params;
 
   try {
     // Retrieve the file entry from the database
     const fileDB = await File.findOne({ ipfsCID: cid });
+    let success = false;
     if (!fileDB)
       return res.status(400).json({ message: "File CID not found in DB" });
 
     // Convert the stored Base64 key to a Buffer
     const key = fileDB.encryptionkey; // Directly use the buffer
     console.log(`Key Length: ${key.length}`); // Should output 32
+    const mimeType = fileDB.mimeType;
 
     console.log(fileDB);
     console.log(cid);
@@ -140,10 +143,12 @@ router.get("/retrieve/:cid", fetchuser, async (req, res) => {
 
     // Convert the decrypted buffer to Base64 format (if needed)
     const decryptedBase64 = Buffer.from(decryptedBuffer).toString("base64");
-
+    success = true;
     // Send the Base64 encoded data in the response
     res.status(200).json({
+      success,
       decryptedBase64,
+      mimeType,
     });
   } catch (error) {
     console.error("Error retrieving file from IPFS:", error.message);

@@ -1,39 +1,48 @@
-import { useState } from "react";
-import { Menu, X } from 'lucide-react';
-import { NavLink } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.min.css";
+const Navbar = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const logout = () => {
+    localStorage.removeItem("token");
+    toast.success("You have logged out successfully");
+    navigate("/");
+  };
+  return (
+    <nav className="bg-gray-800 text-white py-3 px-6 flex w-[60%] rounded-3xl shadow-lg mx-auto mb-4 mt-2 justify-between items-center">
+      <div className="flex items-center">
+        <a href="/home" className="text-xl font-bold">Redactronix</a>
+      </div>
+      <div className="flex justify-center space-x-4">
+        <Link to="/home" className="hover:text-gray-300">
+          Home
+        </Link>
+        <Link to="/savedfiles" className="hover:text-gray-300">
+          Files
+        </Link>
+        <Link to="/history" className="hover:text-gray-300">
+          History
+        </Link>
+      </div>
+      {token ?(
+        <div>
+          <button
+            onClick={logout}
+            className="border-red-500 border-2  hover:bg-red-600 text-white px-2 py-2 rounded-md"
+          >
+            Logout
+          </button>
+        </div>
+      )
+    :
+    <Link to='/signin'>
+    Sign-in
+    </Link>
+    }
+    </nav>
+  );
+};
 
-export default function Navbar() {
-    const [active, setActive] = useState(true);
-
-    return (
-        <nav className="bg-gradient-to-r from-red-400 to-pink-500 px-4 sm:px-6 py-4 shadow-lg">
-            <div className="container flex flex-wrap justify-between items-center mx-auto">
-                <NavLink to="/" className="text-3xl font-bold text-white hover:text-gray-200 transition-colors duration-300">REDACTION</NavLink>
-                <div className="flex md:order-2 md:hidden">
-                    <button type="button" onClick={() => setActive(!active)} className="text-white hover:text-gray-200 transition-colors duration-300">
-                        {active ? <Menu size={30} /> : <X size={30} />} 
-                    </button>
-                </div>
-                <div className={`${active ? `hidden` : `block`} w-full md:flex md:w-auto md:order-1 transition-all duration-300 ease-in-out`}>
-                    <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 text-lg text-white">
-                        <li className="py-2 md:py-0">
-                            <NavLink to="/" className="py-4 pr-6 pl-0 hover:opacity-80 transition-opacity duration-300">Explore</NavLink>
-                        </li>
-                        <li className="py-2 md:py-0">
-                            <NavLink to="/" className="py-4 pr-6 pl-0 hover:opacity-80 transition-opacity duration-300">Resources</NavLink>
-                        </li>
-                        <li className="py-2 md:py-0">
-                            <NavLink to="/" className="py-4 pr-6 pl-0 hover:opacity-80 transition-opacity duration-300">Creators</NavLink>
-                        </li>
-                        <li className="py-2 md:py-0">
-                            <NavLink to="/signin" className="py-2 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all duration-300 shadow-lg">Sign In</NavLink>
-                        </li>
-                        <li className="py-2 md:py-0">
-                            <NavLink to="/signup" className="py-2 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all duration-300 shadow-lg">Sign Up</NavLink>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    );
-}
+export default Navbar;

@@ -8,6 +8,7 @@ import re
 import spacy
 import fitz  # PyMuPDF
 import tempfile
+import spacy_transformers
 
 app = Flask(__name__)
 
