@@ -180,93 +180,124 @@ def redact_pdf_with_black_fill(input_pdf_path, exclude_words):
 
 @app.route('/redact_image', methods=['POST'])
 def redact_image_route():
-    if 'file' not in request.files or 'entities' not in request.form:
-        return jsonify({"error": "No file or entities provided"}), 400
+    data = request.get_json()
 
-    file = request.files['file']
-    entities = request.form.get('entities',[])  # Get entities as a list
+    # Check if the required fields are provided
+    if not data or 'file' not in data or 'filename' not in data or 'entities' not in data:
+        return jsonify({"error": "No file, filename, or entities provided"}), 400
 
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
+    # Retrieve the Base64 file, filename, and entities from the request
+    base64_file = data['file']
+    filename = data['filename']
+    entities = data['entities']
 
-    filename = file.filename
+    # Ensure entities is a list
+    if isinstance(entities, str):
+        try:
+            entities = json.loads(entities)
+        except ValueError:
+            return jsonify({"error": "Entities must be a valid JSON list"}), 400
+
+    # Decode the Base64 file
+    try:
+        file_data = base64.b64decode(base64_file)
+    except (base64.binascii.Error, ValueError):
+        return jsonify({"error": "Invalid Base64 encoding"}), 400
+
+    # Save the decoded file to the UPLOAD_FOLDER
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
+    with open(file_path, 'wb') as file:
+        file.write(file_data)
 
-    # Get redacted image and words
+    # Call your redaction logic
     redacted_image_path, redacted_words = redact_image_entities(file_path, entities)
 
-    # Read the image file
+    # Read the redacted image file and encode it in Base64
     with open(redacted_image_path, 'rb') as img_file:
-        img_data = io.BytesIO(img_file.read())
+        img_data = img_file.read()
+        redacted_image_base64 = base64.b64encode(img_data).decode('utf-8')
 
-    # Create a response with the image attachment and redacted words
-    response = make_response(send_file(img_data, mimetype='image/jpeg', as_attachment=True, download_name=os.path.basename(redacted_image_path)))
+    # Prepare the response data
+    response_data = {
+        'file': redacted_image_base64,
+        'name_redacted': redacted_words
+    }
 
-    # Attach redacted words as a header (or you could include them in a separate response part)
-    response.headers['Redacted-Words'] = ','.join(redacted_words)
-
-    return response
-
+    return jsonify(response_data)
 @app.route('/confirm_image_redaction', methods=['POST'])
 def confirm_image_redaction():
-    if 'file' not in request.files or 'exclude_words' not in request.form:
+    data = request.get_json()
+
+    if 'file' not in data or 'exclude_words' not in data:
         return jsonify({"error": "No file or words provided"}), 400
 
-    file = request.files['file']
-    exclude_words = request.form.getlist('exclude_words')
+    # Decode the Base64 image and save it
+    file = data['file']
+    exclude_words = data['exclude_words']
+    filename = data.get('filename', 'image.jpg')  # Default to 'image.jpg' if filename isn't provided
 
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
+    file_path = decode_base64_to_file(file, filename)
 
-    filename = file.filename
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-
+    # Redact the image based on the excluded words
     final_image_path = redact_image_with_black_fill(file_path, exclude_words)
 
-    return send_from_directory(app.config['REDACTED_FOLDER'], os.path.basename(final_image_path), as_attachment=True)
-
-@app.route('/redact_pdf', methods=['POST'])
-def redact_pdf_route():
-    if 'file' not in request.files or 'entities' not in request.form:
-        return jsonify({"error": "No file or entities provided"}), 400
-
-    file = request.files['file']
-    entities = request.form.get('entities',[])
-
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
-
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        file_path = temp_file.name
-        file.save(file_path)
-
-    redacted_pdf_path, redacted_words = redact_pdf_entities(file_path, entities)
+    # Encode the redacted image back to Base64
+    redacted_image_base64 = encode_file_to_base64(final_image_path)
 
     return jsonify({
-        "redacted_pdf": redacted_pdf_path,
+        "redacted_image": redacted_image_base64
+    })
+
+# Endpoint to redact PDF
+@app.route('/redact_pdf', methods=['POST'])
+def redact_pdf_route():
+    data = request.get_json()
+
+    if 'file' not in data or 'entities' not in data:
+        return jsonify({"error": "No file or entities provided"}), 400
+
+    # Decode the Base64 PDF and save it
+    file = data['file']
+    entities = data['entities']
+    filename = data.get('filename', 'document.pdf')  # Default to 'document.pdf' if filename isn't provided
+
+    file_path = decode_base64_to_file(file, filename)
+
+    # Redact the PDF based on the provided entities
+    redacted_pdf_path, redacted_words = redact_pdf_entities(file_path, entities)
+
+    # Encode the redacted PDF back to Base64
+    redacted_pdf_base64 = encode_file_to_base64(redacted_pdf_path)
+
+    return jsonify({
+        "redacted_pdf": redacted_pdf_base64,
         "redacted_words": redacted_words
     })
 
+# Endpoint to confirm PDF redaction
 @app.route('/confirm_pdf_redaction', methods=['POST'])
 def confirm_pdf_redaction():
-    if 'file' not in request.files or 'exclude_words' not in request.form:
+    data = request.get_json()
+
+    if 'file' not in data or 'exclude_words' not in data:
         return jsonify({"error": "No file or words provided"}), 400
 
-    file = request.files['file']
-    exclude_words = request.form.get('exclude_words',[])
+    # Decode the Base64 PDF and save it
+    file = data['file']
+    exclude_words = data['exclude_words']
+    filename = data.get('filename', 'document.pdf')  # Default to 'document.pdf' if filename isn't provided
 
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
+    file_path = decode_base64_to_file(file, filename)
 
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        file_path = temp_file.name
-        file.save(file_path)
-
+    # Perform the black fill redaction based on the excluded words
     final_pdf_path = redact_pdf_with_black_fill(file_path, exclude_words)
 
-    return send_from_directory(app.config['REDACTED_FOLDER'], os.path.basename(final_pdf_path), as_attachment=True)
+    # Encode the redacted PDF back to Base64
+    redacted_pdf_base64 = encode_file_to_base64(final_pdf_path)
+
+    return jsonify({
+        "redacted_pdf": redacted_pdf_base64
+    })
 
 if __name__ == '__main__':
     app.run(debug=True,use_reloader=False)
