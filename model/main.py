@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 import io
+from flask import Flask, request, jsonify
+import io
 import os
 import cv2
 import pytesseract
@@ -27,6 +29,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(REDACTED_FOLDER, exist_ok=True)
 
 # Load spaCy's English NLP model
+nlp = spacy.load("model-best")
 nlp = spacy.load("model-best")
 
 # Define a regex pattern for email addresses
@@ -99,6 +102,7 @@ def redact_pdf_entities(input_pdf_path, entities_to_redact):
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
         temp_file_path = temp_file.name
     
+    doc = fitz.open(input_pdf_path)
     doc = fitz.open(input_pdf_path)
     pdf_redacted_words = []
 
@@ -219,9 +223,21 @@ def confirm_image_redaction():
     filename = data.get('filename', 'image.jpg')
 
     file_path = decode_base64_to_file(file, filename)
+    file = data['file']
+    exclude_words = data['exclude_words']
+    filename = data.get('filename', 'image.jpg')
+
+    file_path = decode_base64_to_file(file, filename)
 
     final_image_path = redact_image_with_black_fill(file_path, exclude_words)
 
+    redacted_image_base64 = encode_file_to_base64(final_image_path)
+
+    return jsonify({
+        "redacted_image": redacted_image_base64
+    })
+
+# Endpoint to redact PDF
     redacted_image_base64 = encode_file_to_base64(final_image_path)
 
     return jsonify({
@@ -234,8 +250,16 @@ def redact_pdf_route():
     data = request.get_json()
 
     if 'file' not in data or 'entities' not in data:
+    data = request.get_json()
+
+    if 'file' not in data or 'entities' not in data:
         return jsonify({"error": "No file or entities provided"}), 400
 
+    file = data['file']
+    entities = data['entities']
+    filename = data.get('filename', 'document.pdf')
+
+    file_path = decode_base64_to_file(file, filename)
     file = data['file']
     entities = data['entities']
     filename = data.get('filename', 'document.pdf')
@@ -246,14 +270,22 @@ def redact_pdf_route():
 
     redacted_pdf_base64 = encode_file_to_base64(redacted_pdf_path)
 
+    redacted_pdf_base64 = encode_file_to_base64(redacted_pdf_path)
+
     return jsonify({
+        "redacted_file": redacted_pdf_base64,
+        "words_redacted": redacted_words
         "redacted_file": redacted_pdf_base64,
         "words_redacted": redacted_words
     })
 
 # Endpoint to confirm PDF redaction
+# Endpoint to confirm PDF redaction
 @app.route('/confirm_pdf_redaction', methods=['POST'])
 def confirm_pdf_redaction():
+    data = request.get_json()
+
+    if 'file' not in data or 'exclude_words' not in data:
     data = request.get_json()
 
     if 'file' not in data or 'exclude_words' not in data:
@@ -264,9 +296,19 @@ def confirm_pdf_redaction():
     filename = data.get('filename', 'document.pdf')
 
     file_path = decode_base64_to_file(file, filename)
+    file = data['file']
+    exclude_words = data['exclude_words']
+    filename = data.get('filename', 'document.pdf')
+
+    file_path = decode_base64_to_file(file, filename)
 
     final_pdf_path = redact_pdf_with_black_fill(file_path, exclude_words)
 
+    redacted_pdf_base64 = encode_file_to_base64(final_pdf_path)
+
+    return jsonify({
+        "redacted_file": redacted_pdf_base64
+    })
     redacted_pdf_base64 = encode_file_to_base64(final_pdf_path)
 
     return jsonify({
