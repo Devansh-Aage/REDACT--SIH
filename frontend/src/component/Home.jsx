@@ -14,9 +14,10 @@ function Home() {
   }
   const [userFiles, setUserFiles] = useState([]);
   const [fileLoadingState, setfileLoadingState] = useState(false);
-
+  const [fileName, setfileName] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [base64FileData, setBase64FileData] = useState(null);
 
   useEffect(() => {
     const getUserFiles = async () => {
@@ -56,11 +57,22 @@ function Home() {
     const file = e.target.files[0];
     if (file) {
       setUploadedFile(file);
+      setfileName(file.name);
+      console.log(file);
+
       const fileUrl = URL.createObjectURL(file);
       setPreviewUrl(fileUrl);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // console.log(reader.result);
+
+        setBase64FileData(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
     // console.log(uploadedFile);
-    
+
     // if(uploadedFile && previewUrl){
     //   navigate('/uploaded',{state:{uploadedFile:uploadedFile, fileData:previewUrl}});
     // }
@@ -68,9 +80,15 @@ function Home() {
 
   if (uploadedFile) {
     return (
-      <div className="w-full h-full">
-        <UploadFile uploadedFile={uploadedFile} fileData={previewUrl} />
-      </div>
+      base64FileData && (
+        <div className="w-full h-full">
+          <UploadFile
+            uploadedFile={uploadedFile}
+            fileData={base64FileData}
+            fileName={fileName}
+          />
+        </div>
+      )
     );
   }
 
@@ -102,10 +120,18 @@ function Home() {
               drop
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              <span className="text-white px-2 py-1 rounded-md bg-red-600 mr-2">JPG</span>
-              <span className="text-white px-2 py-1 rounded-md bg-green-600 mr-2">JPEG</span>
-              <span className="text-white px-2 py-1 rounded-md bg-blue-600 mr-2">PNG</span>
-              <span className="text-white px-2 py-1 rounded-md bg-yellow-600">PDF</span>
+              <span className="text-white px-2 py-1 rounded-md bg-red-600 mr-2">
+                JPG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-green-600 mr-2">
+                JPEG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-blue-600 mr-2">
+                PNG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-yellow-600">
+                PDF
+              </span>
             </p>
           </div>
           <input

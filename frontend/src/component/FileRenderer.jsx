@@ -22,6 +22,7 @@ const FileRenderer = ({ fileMimeType, fileData }) => {
           </Worker>
         </div>
       ) : (
+      
         <FileViewer
           fileType={fileMimeType}
           filePath={fileData}

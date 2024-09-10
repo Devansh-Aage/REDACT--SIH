@@ -23,7 +23,7 @@ const Navbar = () => {
           Files
         </Link>
         <Link to="/history" className="hover:text-gray-300">
-          History
+          Audits
         </Link>
       </div>
       {token ?(
@@ -37,7 +37,7 @@ const Navbar = () => {
         </div>
       )
     :
-    <Link to='/signin'>
+    <Link to='/'>
     Sign-in
     </Link>
     }

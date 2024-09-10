@@ -12,6 +12,7 @@ import { ToastContainer } from "react-toastify";
 import SavedFile from "./component/SavedFile";
 import UploadFile from "./component/UploadFile";
 import SavedFiles from "./component/SavedFiles";
+import Audits from "./component/Audits";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/savedfiles" element={<SavedFiles />} />
         <Route path="/redacted" element={<Redacted />} />
         <Route path="/uploaded" element={<UploadFile />} />
+        <Route path="/history" element={<Audits />} />
         <Route path="/file/:cid" element={<SavedFile />} />
       </Routes>
       <ToastContainer draggable='mouse' />

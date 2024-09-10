@@ -13,6 +13,7 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth.js"));
 app.use("/api/files", require("./routes/files.js"));
 app.use("/api/cloud", require("./routes/cloudfiles.js"));
+app.use("/api/audit", require("./routes/audit.js"));
 
 app.listen(port, () => {
   console.log(`Redact App listening on port ${port}`);

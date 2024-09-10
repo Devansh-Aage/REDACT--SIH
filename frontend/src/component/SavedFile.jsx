@@ -4,10 +4,10 @@ import { useParams } from "react-router-dom";
 import FileRenderer from "./FileRenderer";
 
 const SavedFile = ({}) => {
+  const token = localStorage.getItem("token");
   const { cid } = useParams();
   const [file, setFile] = useState(null);
   const [mimeTypeFile, setmimeTypeFile] = useState("");
-
 
   useEffect(() => {
     const fetchFile = async () => {
@@ -21,6 +21,20 @@ const SavedFile = ({}) => {
         // Prepare file data for FileViewer
         const fileUrl = `data:${mimeType};base64,${base64String}`;
         setFile(fileUrl);
+        const saveAudit = async () =>
+          await axios.post(
+            "http://localhost:3001/api/audit/addaudit",
+            {
+              cid: cid,
+              eventType: 1,
+            },
+            {
+              headers: {
+                "auth-token": token,
+              },
+            }
+          );
+          saveAudit();
       } catch (error) {
         console.error("Error fetching file:", error);
       }

@@ -34,6 +34,7 @@ const SavedFiles = () => {
         const response = await res.data;
         if (response.success) {
           setUserFiles(response.files);
+          
         }
       } catch (error) {
         console.error(error, "Error while fetching user files");
@@ -45,6 +46,10 @@ const SavedFiles = () => {
 
     getUserFiles();
   }, [token]);
+
+  const handleFileClick=(cid)=>{
+    navigate(`/file/${cid}`);
+  }
 
   return (
     <div>
