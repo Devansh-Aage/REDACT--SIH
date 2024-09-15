@@ -14,6 +14,7 @@ router.post(
     //Validating User Details
     body("email", "Enter a valid e-mail").isEmail(),
     body("name", "Username: minimum 3 characters").isLength({ min: 3 }),
+    body("role", " Select a valid role").isString(),
     body("password", "Password: minimum 6 characters").isLength({ min: 6 }),
   ],
   async (req, res) => {
@@ -36,6 +37,7 @@ router.post(
       user = await User.create({
         name: req.body.name,
         email: req.body.email,
+        role: req.body.role,
         password: secPass,
       });
       const data = {

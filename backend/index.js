@@ -14,6 +14,7 @@ app.use("/api/auth", require("./routes/auth.js"));
 app.use("/api/files", require("./routes/files.js"));
 app.use("/api/cloud", require("./routes/cloudfiles.js"));
 app.use("/api/audit", require("./routes/audit.js"));
+app.use("/api/org", require("./routes/org.js"));
 
 app.listen(port, () => {
   console.log(`Redact App listening on port ${port}`);
