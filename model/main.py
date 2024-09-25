@@ -114,6 +114,7 @@ def redact_pdf_entities(input_pdf_path, entities_to_redact):
         words_to_redact = []
         
         for ent in pdf_doc.ents:
+            print(ent.label_,ent.text)
             if ent.label_ in entities_to_redact:
                 words_to_redact.append(ent.text)
         
@@ -162,7 +163,7 @@ def redact_pdf_with_black_fill(input_pdf_path, exclude_words):
 
     doc = fitz.open(input_pdf_path)
 
-    words_to_redact = [word for word in pdf_redacted_words if word not in exclude_words]
+    words_to_redact = [word for word in pdf_redacted_words if word in exclude_words]
 
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
@@ -223,11 +224,6 @@ def confirm_image_redaction():
     filename = data.get('filename', 'image.jpg')
 
     file_path = decode_base64_to_file(file, filename)
-    file = data['file']
-    exclude_words = data['exclude_words']
-    filename = data.get('filename', 'image.jpg')
-
-    file_path = decode_base64_to_file(file, filename)
 
     final_image_path = redact_image_with_black_fill(file_path, exclude_words)
 
@@ -236,30 +232,14 @@ def confirm_image_redaction():
     return jsonify({
         "redacted_image": redacted_image_base64
     })
-
-# Endpoint to redact PDF
-    redacted_image_base64 = encode_file_to_base64(final_image_path)
-
-    return jsonify({
-        "redacted_image": redacted_image_base64
-    })
-
 # Endpoint to redact PDF
 @app.route('/redact_pdf', methods=['POST'])
 def redact_pdf_route():
-    data = request.get_json()
-
-    if 'file' not in data or 'entities' not in data:
-    data = request.get_json()
+    data = request.form
 
     if 'file' not in data or 'entities' not in data:
         return jsonify({"error": "No file or entities provided"}), 400
 
-    file = data['file']
-    entities = data['entities']
-    filename = data.get('filename', 'document.pdf')
-
-    file_path = decode_base64_to_file(file, filename)
     file = data['file']
     entities = data['entities']
     filename = data.get('filename', 'document.pdf')
@@ -270,11 +250,7 @@ def redact_pdf_route():
 
     redacted_pdf_base64 = encode_file_to_base64(redacted_pdf_path)
 
-    redacted_pdf_base64 = encode_file_to_base64(redacted_pdf_path)
-
     return jsonify({
-        "redacted_file": redacted_pdf_base64,
-        "words_redacted": redacted_words
         "redacted_file": redacted_pdf_base64,
         "words_redacted": redacted_words
     })
@@ -283,10 +259,7 @@ def redact_pdf_route():
 # Endpoint to confirm PDF redaction
 @app.route('/confirm_pdf_redaction', methods=['POST'])
 def confirm_pdf_redaction():
-    data = request.get_json()
-
-    if 'file' not in data or 'exclude_words' not in data:
-    data = request.get_json()
+    data = request.form
 
     if 'file' not in data or 'exclude_words' not in data:
         return jsonify({"error": "No file or words provided"}), 400
@@ -296,24 +269,16 @@ def confirm_pdf_redaction():
     filename = data.get('filename', 'document.pdf')
 
     file_path = decode_base64_to_file(file, filename)
-    file = data['file']
-    exclude_words = data['exclude_words']
-    filename = data.get('filename', 'document.pdf')
-
-    file_path = decode_base64_to_file(file, filename)
 
     final_pdf_path = redact_pdf_with_black_fill(file_path, exclude_words)
-
     redacted_pdf_base64 = encode_file_to_base64(final_pdf_path)
 
     return jsonify({
         "redacted_file": redacted_pdf_base64
     })
-    redacted_pdf_base64 = encode_file_to_base64(final_pdf_path)
 
-    return jsonify({
-        "redacted_file": redacted_pdf_base64
-    })
+    # ciphertext = bytes.fromhex(request.json.get('ciphertext'))  
+    # plaintext = decrypt_message(ciphertext) 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,use_reloader=False)

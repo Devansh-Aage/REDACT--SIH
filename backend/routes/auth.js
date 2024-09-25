@@ -43,6 +43,7 @@ router.post(
       const data = {
         user: {
           id: user.id,
+          role: req.body.role,
         },
       };
       const authToken = jwt.sign(data, process.env.JWT_SECRET);
@@ -63,6 +64,7 @@ router.post(
   [
     //Validating User Details
     body("email", "Enter a valid e-mail").isEmail(),
+    body("role", " Select a valid role").isString(),
     body("password", "Password cannot be empty").exists(),
   ],
   async (req, res) => {
@@ -72,7 +74,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     try {
       let user = await User.findOne({ email });
       if (!user) {
@@ -80,6 +82,10 @@ router.post(
       }
 
       const passCompare = await bcrypt.compare(password, user.password);
+      if (role !== user.role) {
+        success = false;
+        return res.status(400).json({ success, error: "Wrong Role Selected" });
+      }
       if (!passCompare) {
         success = false;
         return res.status(400).json({ success, error: "Wrong Credentials" });
@@ -87,6 +93,7 @@ router.post(
       const data = {
         user: {
           id: user.id,
+          role: role,
         },
       };
       const authtoken = jwt.sign(data, process.env.JWT_SECRET);
@@ -106,6 +113,18 @@ router.get("/getuser", fetchuser, async (req, res) => {
     const userId = req.user.id;
     const user = await User.findById(userId).select("-password");
     res.send(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Unexpected error occurred ");
+  }
+});
+
+router.get("/get-user", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if(!userId)res.status(400).json({message:"No User Id Provided"})
+    const user = await User.findById(userId).select("-password");
+    res.status(200).json({ user });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Unexpected error occurred ");

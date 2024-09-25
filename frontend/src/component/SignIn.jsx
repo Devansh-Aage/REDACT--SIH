@@ -1,15 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Cascader } from "antd";
+
+const options = [
+  {
+    value: "admin",
+    label: "Admin",
+  },
+  {
+    value: "employee",
+    label: "Employee",
+  },
+  {
+    value: "normal",
+    label: "Regular",
+  },
+];
 
 const SignIn = () => {
-  const [credential, SetCredential] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  if (token) {
-    navigate("/home");
-  }
+  const [credential, SetCredential] = useState({
+    email: "",
+    password: "",
+    role: "",
+  });
+
+  useEffect(() => {
+    if (token) {
+      navigate("/home");
+    }
+  }, [token]);
+
+  const handleChange = (value) => {
+    SetCredential({
+      ...credential,
+      role: value[0],
+    });
+  };
 
   const handleSubmitClick = async (e) => {
     e.preventDefault();
@@ -19,7 +49,7 @@ const SignIn = () => {
       new Promise(async (resolve, reject) => {
         try {
           const response = await fetch(
-            "http://localhost:3001/api/auth/loginuser",
+            `${import.meta.env.VITE_SERVER_URL}/api/auth/loginuser`,
             {
               method: "POST",
               headers: {
@@ -27,6 +57,7 @@ const SignIn = () => {
               },
               body: JSON.stringify({
                 email: credential.email,
+                role: credential.role,
                 password: credential.password,
               }),
             }
@@ -35,7 +66,9 @@ const SignIn = () => {
           const cred = await response.json();
           if (cred.success) {
             localStorage.setItem("token", cred.authtoken);
-            navigate("/home");
+            if(credential.role==="admin"){
+              navigate('/org');
+            }
             resolve(); // Resolve the promise if successful
           } else {
             reject(); // Reject the promise for an invalid credential
@@ -82,6 +115,22 @@ const SignIn = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={onchange}
               required
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="role"
+              className="flex items-center justify-start text-gray-700 text-sm font-semibold mb-2"
+            >
+              Role
+            </label>
+            <Cascader
+              options={options}
+              value={credential.role}
+              onChange={handleChange}
+              placeholder="Select Role"
+              className="w-full"
+              popupClassName="w-[15rem] h-[200px]"
             />
           </div>
           <div className="mb-6">

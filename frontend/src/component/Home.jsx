@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Upload, message } from "antd";
 import { toast } from "react-toastify";
-import FileCard from "./ui/FileCard";
-import axios from "axios";
 import UploadFile from "./UploadFile";
+import { InboxOutlined } from "@ant-design/icons";
 
+const { Dragger } = Upload;
 function Home() {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -12,70 +13,57 @@ function Home() {
     navigate("/signin");
     toast.error("Please Login First");
   }
-  const [userFiles, setUserFiles] = useState([]);
-  const [fileLoadingState, setfileLoadingState] = useState(false);
-  const [fileName, setfileName] = useState(null);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [base64FileData, setBase64FileData] = useState(null);
 
   useEffect(() => {
-    const getUserFiles = async () => {
-      setfileLoadingState(true);
-      try {
-        const res = await axios.get(
-          "http://localhost:3001/api/cloud/getuserfiles",
-          {
-            headers: {
-              "auth-token": token,
-            },
-          }
-        );
-        if (res.status == 400) {
-          return;
-        }
-        const response = await res.data;
-        if (response.success) {
-          setUserFiles(response.files);
-        }
-      } catch (error) {
-        console.error(error, "Error while fetching user files");
-        toast.error("Failed to fetch user files");
-      } finally {
-        setfileLoadingState(false);
-      }
-    };
+    if (!token) {
+      navigate("/signin");
+      toast.error("Please Login First");
+    }
+  }, [token])
+  
 
-    getUserFiles();
-  }, [token]);
+  const publicKey = import.meta.env.VITE_RSA_PUBLIC_KEY;
+  const [fileName, setfileName] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [base64FileData, setBase64FileData] = useState(null);
 
-  const handleFileClick = (file) => {
-    navigate(`/file/${file}`);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUploadedFile(file);
-      setfileName(file.name);
+  const handleFileChange = ({ file }) => {
+    if (file.status !== "uploading") {
       console.log(file);
+    }
+    if (file.status === "done") {
+      // When the file is uploaded, process it
+      const fileData = file.originFileObj; // Get the actual file
+      setUploadedFile(fileData);
+      setfileName(fileData.name);
 
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
+      const fileUrl = URL.createObjectURL(fileData);
 
+      // Read file as base64
       const reader = new FileReader();
       reader.onloadend = () => {
-        // console.log(reader.result);
-
         setBase64FileData(reader.result);
       };
-      reader.readAsDataURL(file);
-    }
-    // console.log(uploadedFile);
+      reader.readAsDataURL(fileData);
 
-    // if(uploadedFile && previewUrl){
-    //   navigate('/uploaded',{state:{uploadedFile:uploadedFile, fileData:previewUrl}});
-    // }
+      message.success(`${fileData.name} file uploaded successfully`);
+    } else if (file.status === "error") {
+      message.error(`${file.name} file upload failed.`);
+    }
+  };
+
+  const uploadProps = {
+    name: "file",
+    multiple: false,
+    accept: "image/jpg,image/jpeg,image/png,application/pdf",
+    showUploadList: false,
+    customRequest: ({ file, onSuccess }) => {
+      // Simulate an async upload
+      setTimeout(() => {
+        onSuccess("ok");
+      }, 1000);
+    },
+    onChange: handleFileChange,
   };
 
   if (uploadedFile) {
@@ -93,9 +81,28 @@ function Home() {
   }
 
   return (
-    <div className="w-full h-full">
-      <div className="flex items-center justify-center h-[35rem] w-full px-10">
-        <label
+    <div className="flex items-center justify-center h-[85vh] w-full px-10">
+      <Dragger {...uploadProps} className="w-full h-full">
+        <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+        <p className="ant-upload-text">
+          Click or drag file to this area to upload
+        </p>
+        <p className="ant-upload-hint">
+        <span className="text-white px-2 py-1 rounded-md bg-red-600 mr-2">
+                JPG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-green-600 mr-2">
+                JPEG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-blue-600 mr-2">
+                PNG
+              </span>
+              <span className="text-white px-2 py-1 rounded-md bg-yellow-600">
+                PDF
+              </span>
+        </p>
+      </Dragger>
+      {/* <label
           htmlFor="dropzone-file"
           className="flex flex-col items-center justify-center w-full  border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 h-full dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
         >
@@ -141,20 +148,7 @@ function Home() {
             className="hidden"
             accept="image/jpg,image/jpeg,image/png,application/pdf"
           />
-        </label>
-      </div>
-      {/* <div>
-        <div className="font-semibold pt-6 pb-4 text-left text-3xl ml-20">
-          Saved Files
-        </div>
-        <div className="flex items-center justify-evenly gap-6 flex-wrap">
-          {userFiles.map((file) => (
-            <div key={file._id} onClick={() => handleFileClick(file.ipfsCID)}>
-              <FileCard file={file} />
-            </div>
-          ))}
-        </div>
-      </div> */}
+        </label> */}
     </div>
   );
 }
