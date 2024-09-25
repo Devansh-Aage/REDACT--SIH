@@ -13,34 +13,32 @@ const Navbar = () => {
     navigate("/");
   };
 
-
   const role = getRole(token);
 
   return (
-    <nav className="bg-gray-800 text-white py-3 px-6 flex w-[60%] rounded-3xl shadow-lg mx-auto mb-4 mt-2 justify-between items-center">
+    <nav className="bg-gray-800 text-white py-2 px-6 flex w-[60%] rounded-3xl shadow-lg mx-auto mb-4 mt-2 justify-between items-center">
       <div className="flex items-center">
-        <a href="/home" className="text-xl font-bold">
+        <a href="/home" className="text-2xl font-semibold">
           Redactronix
         </a>
       </div>
       <div className="flex justify-center space-x-4">
         {token && (
           <>
-           {role ==="admin" &&
-             <Link to="/admin-dashboard" className="hover:text-gray-300">
-             Admin Dashboard
-           </Link>
-            }
-            <Link to="/home" className="hover:text-gray-300">
+            {role === "admin" && (
+              <Link to="/admin-dashboard" className="hover:text-gray-300 h-fit text-lg">
+                Dashboard
+              </Link>
+            )}
+            <Link to="/home" className="hover:text-gray-300 h-fit text-lg">
               Home
             </Link>
-            <Link to="/savedfiles" className="hover:text-gray-300">
+            <Link to="/savedfiles" className="hover:text-gray-300 h-fit text-lg">
               Files
             </Link>
-            <Link to="/history" className="hover:text-gray-300">
+            <Link to="/history" className="hover:text-gray-300 h-fit text-lg">
               Audits
             </Link>
-           
           </>
         )}
       </div>

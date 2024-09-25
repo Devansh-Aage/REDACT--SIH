@@ -3,12 +3,16 @@ import { Input } from "antd"; // Import AntD's Input component
 import "antd/dist/reset.css"; // Import AntD styles
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Org = () => {
   const token = localStorage.getItem("token");
   const [orgName, setOrgName] = useState("");
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const authToken = location.state.authToken;
 
   const handleOrgNameChange = (event) => {
     setOrgName(event.target.value);
@@ -38,6 +42,28 @@ const Org = () => {
     }
   };
 
+  useEffect(() => {
+    const checkIfOrg = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/api/org/get-org`,
+          {
+            headers: {
+              "auth-token": authToken,
+            },
+          }
+        );
+        const data = await res.data;
+        if (data.success) {
+          navigate("/admin-dashboard");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    checkIfOrg();
+  }, [authToken]);
+
   return (
     <div className="flex items-center justify-center w-full ">
       <div className="bg-white p-8 rounded-lg shadow-lg  mt-20">
@@ -52,7 +78,7 @@ const Org = () => {
           />
         </div>
         <button
-        onClick={()=>handleClick()}
+          onClick={() => handleClick()}
           type="submit"
           className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors duration-300"
         >

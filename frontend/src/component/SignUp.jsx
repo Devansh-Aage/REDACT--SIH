@@ -130,7 +130,7 @@ const SignUp = () => {
               name="name" // Add the name attribute
               onChange={onchange}
               id="name"
-              placeholder="Enter your full name"
+              placeholder="Enter Username"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

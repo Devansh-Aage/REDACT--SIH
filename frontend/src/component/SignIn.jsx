@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Cascader } from "antd";
+import axios from "axios";
 
 const options = [
   {
@@ -66,9 +67,14 @@ const SignIn = () => {
           const cred = await response.json();
           if (cred.success) {
             localStorage.setItem("token", cred.authtoken);
-            if(credential.role==="admin"){
-              navigate('/org');
+            if (credential.role === "admin") {
+              navigate("/org", {
+                state: {
+                  authToken: cred.authtoken,
+                },
+              });
             }
+            navigate("/home");
             resolve(); // Resolve the promise if successful
           } else {
             reject(); // Reject the promise for an invalid credential
