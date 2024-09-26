@@ -12,24 +12,26 @@ const Redacted = () => {
   const fileType = rawfileType.split("/")[1];
 
   return (
-    <div className="w-full flex items-center justify-between">
-      <div className="w-[95%] h-screen flex items-start justify-around gap-20 ">
+    <div className="w-full h-screen flex flex-col">
+      <div className="w-full h-full flex items-start justify-between p-8 space-x-8">
         {/* Preview File Renderer */}
-        <div className="flex-1 h-full ">
-          <h2 className="text-center text-lg font-semibold mb-4">Preview File</h2>
+        <div className="w-1/2 h-full border border-gray-300 p-4">
+          <h2 className="text-center text-lg font-semibold mb-4">
+            Preview File
+          </h2>
           <FileRenderer fileData={previewBase64} fileMimeType={fileType} />
         </div>
-        {/* <div>
-          Frr
-        </div> */}
+
         {/* Redacted File Renderer */}
-        <div className="flex-1 h-full">
-          <h2 className="text-center text-lg font-semibold mb-4">Redacted File</h2>
+        <div className="w-1/2 h-full border border-gray-300 p-4">
+          <h2 className="text-center text-lg font-semibold mb-4">
+            Redacted File
+          </h2>
           <FileRenderer fileData={base64Data} fileMimeType={fileType} />
         </div>
       </div>
 
-      <div className="bg-slate-50 py-4  h-[30rem] flex flex-col gap-6 px-16">
+      <div className="bg-slate-50 py-4 h-auto flex flex-col gap-6 px-16">
         {/* Download and Save in Cloud Buttons */}
         <div className="flex items-center justify-around">
           <div className="bg-blue-400 hover:cursor-pointer shadow-md text-white mr-4 px-2 py-1 rounded flex items-center gap-2">
@@ -41,7 +43,7 @@ const Redacted = () => {
             Save in Cloud
           </div>
         </div>
-        
+
         {/* Back to Home Button */}
         <div className="bg-blue-500 hover:cursor-pointer mx-auto w-[60%] shadow-md text-white px-2 py-1 rounded flex items-center justify-center gap-2">
           <Home size={20} />
