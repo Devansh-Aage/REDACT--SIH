@@ -103,6 +103,7 @@ const Audits = () => {
         columns={columns}
         rowKey="cid"
         className="px-20"
+        pagination={false}
       />
     </div>
   );

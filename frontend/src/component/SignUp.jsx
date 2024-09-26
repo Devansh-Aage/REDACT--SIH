@@ -1,16 +1,41 @@
 import React, { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Cascader } from "antd";
+
+const options = [
+  {
+    value: "admin",
+    label: "Admin",
+  },
+  {
+    value: "employee",
+    label: "Employee",
+  },
+  {
+    value: "normal",
+    label: "Regular",
+  },
+];
 
 const SignUp = () => {
   const [credential, SetCredential] = useState({
     name: "",
     email: "",
+    role: "",
     password: "",
     confirmPassword: "",
   });
+
   const navigate = useNavigate();
+
+  const handleChange = (value) => {
+    SetCredential({
+      ...credential,
+      role: value[0],
+    });
+  };
 
   const handleSubmitClick = async (e) => {
     e.preventDefault();
@@ -20,13 +45,12 @@ const SignUp = () => {
       toast.error("Passwords do not match!");
       return;
     }
-
     // Show the toast notification while the promise resolves
     await toast.promise(
       new Promise(async (resolve, reject) => {
         try {
           const response = await fetch(
-            "http://localhost:3001/api/auth/createuser",
+            `${import.meta.env.VITE_SERVER_URL}/api/auth/createuser`,
             {
               method: "POST",
               headers: {
@@ -36,6 +60,7 @@ const SignUp = () => {
                 name: credential.name,
                 email: credential.email,
                 password: credential.password,
+                role: credential.role,
               }),
             }
           );
@@ -43,8 +68,8 @@ const SignUp = () => {
           const cred = await response.json();
 
           if (cred.success) {
-            localStorage.setItem("token", cred.authtoken);
-            navigate("/signin");
+            // localStorage.setItem("token", cred.authtoken);
+            navigate("/");
             resolve(); // Resolve the promise if successful
           } else {
             reject(); // Reject the promise if credentials are invalid
@@ -71,7 +96,7 @@ const SignUp = () => {
 
   return (
     <div className="flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mt-12">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mt-4">
         <h2 className="text-3xl font-bold mb-6 text-gray-900 text-center">
           Sign Up
         </h2>
@@ -98,16 +123,32 @@ const SignUp = () => {
               htmlFor="name"
               className="flex items-center justify-start text-gray-700 text-sm font-semibold mb-2"
             >
-              Full Name
+              Username
             </label>
             <input
               type="text"
               name="name" // Add the name attribute
               onChange={onchange}
               id="name"
-              placeholder="Enter your full name"
+              placeholder="Enter Username"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="role"
+              className="flex items-center justify-start text-gray-700 text-sm font-semibold mb-2"
+            >
+              Role
+            </label>
+            <Cascader
+              options={options}
+              value={credential.role}
+              onChange={handleChange}
+              placeholder="Select Role"
+              className="w-full"
+              popupClassName="w-[15rem] "
             />
           </div>
           <div className="mb-4">

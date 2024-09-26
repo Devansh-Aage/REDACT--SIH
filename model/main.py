@@ -147,6 +147,7 @@ def redact_pdf_entities(input_pdf_path, entities_to_redact):
         words_to_redact = []
         
         for ent in pdf_doc.ents:
+            print(ent.label_,ent.text)
             if ent.label_ in entities_to_redact:
                 words_to_redact.append(ent.text)
         
@@ -217,7 +218,7 @@ def redact_pdf_with_black_fill(input_pdf_path, exclude_words):
 
     doc = fitz.open(input_pdf_path)
 
-    words_to_redact = [word for word in pdf_redacted_words if word not in exclude_words]
+    words_to_redact = [word for word in pdf_redacted_words if word in exclude_words]
 
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
@@ -379,6 +380,7 @@ def redact_pdf_route():
 @app.route('/confirm_pdf_redaction', methods=['POST'])
 def confirm_pdf_redaction():
     data = request.form
+    data = request.form
 
     if 'file' not in data or 'exclude_words' not in data:
         return jsonify({"error": "No file or words provided"}), 400
@@ -399,5 +401,9 @@ def confirm_pdf_redaction():
     # ciphertext = bytes.fromhex(request.json.get('ciphertext'))  
     # plaintext = decrypt_message(ciphertext) 
 
+    # ciphertext = bytes.fromhex(request.json.get('ciphertext'))  
+    # plaintext = decrypt_message(ciphertext) 
+
 if __name__ == '__main__':
+    app.run(debug=True,use_reloader=False)
     app.run(debug=True,use_reloader=False)

@@ -44,72 +44,50 @@ const decryptFile = (buffer, key) => {
   return decrypted;
 };
 
-router.post(
-  "/upload",
-  fetchuser,
-  upload.single("orgFile"),
-  async (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
+router.post("/upload", fetchuser, async (req, res) => {
+  const key = crypto.randomBytes(32);
 
-    const key = crypto.randomBytes(32);
-    console.log(req.file);
+  try {
+    let formData = new FormData();
+    let success = false;
+    const { base64Data, mimeType, filename } = req.body;
 
-    try {
-      let formData = new FormData();
-      let success = false;
-      // Read the file from disk
-      const filePath = path.join(__dirname, "..", req.file.path);
+    const buffer = Buffer.from(base64Data, "base64");
+    const encryptedBuffer = encryptFile(buffer, key);
 
-      const buffer = await fs.readFile(filePath);
-      const encryptedBuffer = encryptFile(buffer, key);
+    const encryptedbase64String = encryptedBuffer.toString("base64");
 
-      // Create a readable stream from the encrypted buffer
-      // const encryptedStream = new stream.Readable();
-      // encryptedStream.push(encryptedBuffer);
-      // encryptedStream.push(null); // End the stream
+    const response = await pinata.upload.base64(encryptedbase64String);
 
-      // Add the encrypted stream to the FormData
-      const encryptedbase64String = encryptedBuffer.toString("base64");
-
-      formData.append("file", encryptedbase64String);
-
-      const response = await pinata.upload.base64(encryptedbase64String);
-
-      // const IPFSHash = await response.data.IpfsHash;
-      console.log(response.data);
-
-      let file = await File.findOne({ encryptionkey: key });
-      if (file) {
-        return res
-          .status(500)
-          .json({ message: "This encryption key has already been used!" });
-      }
-
-      file = await File.create({
-        user: req.user.id,
-        encryptionkey: key,
-        ipfsCID: response.data.cid,
-        mimeType: req.file.mimetype,
-        filename: req.file.originalname,
-      });
-
-      // Delete the file from the upload folder
-      await fs.unlink(filePath);
-      console.log("File deleted");
-      success = true;
-      res.status(200).json({
-        success,
-      });
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      res
+    let file = await File.findOne({ encryptionkey: key });
+    if (file) {
+      return res
         .status(500)
-        .json({ message: "Error uploading file", error: error.message });
+        .json({ message: "This encryption key has already been used!" });
     }
+
+    file = await File.create({
+      user: req.user.id,
+      encryptionkey: key,
+      ipfsCID: response.data.cid,
+      mimeType: mimeType,
+      filename: filename,
+    });
+
+    const cid=response.data.cid;
+
+    success = true;
+    res.status(200).json({
+      success,
+      cid
+    });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res
+      .status(500)
+      .json({ message: "Error uploading file", error: error.message });
   }
-);
+});
 
 // Add this new route to retrieve a file using its CID
 router.get("/retrieve/:cid", async (req, res) => {
@@ -124,11 +102,8 @@ router.get("/retrieve/:cid", async (req, res) => {
 
     // Convert the stored Base64 key to a Buffer
     const key = fileDB.encryptionkey; // Directly use the buffer
-    console.log(`Key Length: ${key.length}`); // Should output 32
+    const filename=fileDB.filename;
     const mimeType = fileDB.mimeType;
-
-    console.log(fileDB);
-    console.log(cid);
 
     // Fetch the file from IPFS
     const response = await pinata.gateways.get(cid);
@@ -149,6 +124,7 @@ router.get("/retrieve/:cid", async (req, res) => {
       success,
       decryptedBase64,
       mimeType,
+      filename
     });
   } catch (error) {
     console.error("Error retrieving file from IPFS:", error.message);

@@ -7,16 +7,19 @@ const SavedFile = ({}) => {
   const token = localStorage.getItem("token");
   const { cid } = useParams();
   const [file, setFile] = useState(null);
+  const [loaderState, setloaderState] = useState(false)
   const [mimeTypeFile, setmimeTypeFile] = useState("");
 
   useEffect(() => {
     const fetchFile = async () => {
       try {
+        setloaderState(true);
         const response = await axios.get(
           `http://localhost:3001/api/files/retrieve/${cid}`
         );
-        const base64String = response.data.decryptedBase64; // Assuming this is your base64 data
-        const mimeType = response.data.mimeType; // Assuming this is your MIME type
+        const base64String = response.data.decryptedBase64; 
+        const filename = response.data.filename;
+        const mimeType = response.data.mimeType;
         setmimeTypeFile(mimeType.split("/")[1]);
         // Prepare file data for FileViewer
         const fileUrl = `data:${mimeType};base64,${base64String}`;
@@ -27,6 +30,7 @@ const SavedFile = ({}) => {
             {
               cid: cid,
               eventType: 1,
+              filename:filename,
             },
             {
               headers: {
@@ -38,12 +42,16 @@ const SavedFile = ({}) => {
       } catch (error) {
         console.error("Error fetching file:", error);
       }
+      finally{
+        setloaderState(false);
+      }
     };
     fetchFile();
   }, [cid]);
 
   return (
-    <div style={{ height: "750px", width: "100%" }}>
+    <div className="relative w-full h-[750px]">
+      {loaderState && <span className="loader bottom-50 mt-[15rem] absolute"></span>}
       <FileRenderer fileData={file} fileMimeType={mimeTypeFile} />
     </div>
   );

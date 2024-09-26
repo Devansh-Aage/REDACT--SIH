@@ -14,7 +14,7 @@ const FileCard = ({ file }) => {
       style={{
         width: 240,
       }}
-      cover={<img alt="logo" className="h-[10rem] aspect-square px-6 py-3" src={`/${fileType}.png`} />}
+      cover={<img alt="logo" className="h-[8rem] aspect-square px-10 py-3 pt-5" src={`/${fileType}.png`} />}
     >
       <Meta title={file.filename} description={`Created at: ${createdAt}`} />
     </Card>

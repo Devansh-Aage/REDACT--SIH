@@ -13,6 +13,8 @@ import SavedFile from "./component/SavedFile";
 import UploadFile from "./component/UploadFile";
 import SavedFiles from "./component/SavedFiles";
 import Audits from "./component/Audits";
+import Org from "./component/Org";
+import AdminDashboard from "./component/AdminDashboard";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
         <Route path="/redacted" element={<Redacted />} />
         <Route path="/uploaded" element={<UploadFile />} />
         <Route path="/history" element={<Audits />} />
+        <Route path="/org" element={<Org />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/file/:cid" element={<SavedFile />} />
       </Routes>
       <ToastContainer draggable='mouse' />
