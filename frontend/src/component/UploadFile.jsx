@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import FileRenderer from "./FileRenderer";
-import { Checkbox, Button } from "antd";
+import { Checkbox } from "antd";
 import { ArrowBigLeft, Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import extractFileType from "../helper/extractFileType";
-// import encryptionFile from "../helper/encryptFile";
+import { Collapse, Tooltip } from "antd";
+import Btn from "./ui/Btn";
 
 const UploadFile = ({ uploadedFile, fileData, fileName }) => {
   const [selectedValues, setSelectedValues] = useState([]);
@@ -14,25 +15,65 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
   const rawMimeType = uploadedFile?.type;
   const mimeType = rawMimeType.split("/")[1];
   const navigate = useNavigate();
+  console.log(selectedValues);
 
   const fileType = extractFileType(fileData);
 
   const options = [
-    "PERSON",
-    "ORG",
-    "PAN",
-    "ACN",
-    "IFSC",
-    "CASTE",
-    "RELIGION",
-    "SEX",
-    "DATE",
-    "HEALTH",
-    "POLITICAL",
-  ]; // List of options
+    {
+      category: "General",
+      items: ["Person", "Age", "Date", "Time", "Phone", "Email", "Location"],
+    },
+    {
+      category: "Medical",
+      items: ["Aadhar Number", "Health", "Medication"],
+    },
+    {
+      category: "Legal",
+      items: ["Organization", "Crime"],
+    },
+    {
+      category: "Finance",
+      items: [
+        "Organization",
+        "GPE",
+        "Aadhar Number",
+        "Credit Card",
+        "PAN Number",
+      ],
+    },
+  ];
 
-  const handleCheckboxChange = (checkedValues) => {
-    setSelectedValues(checkedValues); // Update state with checked values
+  const tooltips = {
+    Person: "Person Name",
+    Age: "Age",
+    Date: "Date",
+    Time: "Time",
+    Phone: "Phone Number",
+    Email: "Email Address",
+    Location: "Location",
+    "Aadhar Number": "Aadhar Card Number",
+    Health: "Health: Includes Names of Diseases",
+    Medication: "Names of Medicines",
+    Organization: "Organization",
+    Crime: "Example: Murder, Theft and Burglary,etc",
+    "Credit Card": "Credit and Debit Card Number",
+    "PAN Number": "PAN Card Number",
+    GPE: "Geographical/Political Words ",
+  };
+
+  const handleCheckboxChange = (checkedValues, category) => {
+    setSelectedValues((prevSelectedValues) => {
+      let newSelectedValues = [...prevSelectedValues];
+      const categoryItems = options.find(
+        (option) => option.category === category
+      ).items;
+      newSelectedValues = newSelectedValues.filter(
+        (value) => !categoryItems.includes(value)
+      );
+      newSelectedValues = [...newSelectedValues, ...checkedValues];
+      return newSelectedValues;
+    });
   };
 
   const handleSaveClick = async () => {
@@ -46,8 +87,6 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
         const res = await axios.post("http://localhost:5000/redact_pdf", form);
         const data = await res.data;
         if (data) {
-          console.log(data.redacted_image);
-
           navigate("/preview", {
             state: {
               filebase64: data.redacted_file,
@@ -63,7 +102,6 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
           form
         );
         const data = await res.data;
-        console.log(data);
         if (data) {
           navigate("/preview", {
             state: {
@@ -87,26 +125,51 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
   };
 
   return (
-    <div className="flex justify-around gap-6 w-full h-full">
-      <div className="w-[65%] h-[40rem] overflow-y-auto">
+    <div className="flex justify-around  gap-6 w-full h-full">
+    
+      <div className="w-[70%] h-[40rem] overflow-y-auto">
         <FileRenderer fileMimeType={mimeType} fileData={fileData} />
       </div>
-      <div className="mt-10">
-        <div
+      <div className="mt-2 w-[30%]">
+        <Btn
+        className="w-[100px] flex items-center gap-3"
           onClick={() => clearUploadedFile()}
-          className="cursor-pointer px-4 py-2 w-24 flex items-center font-semibold text-base bg-black text-white rounded-md mb-4 hover:opacity-80 "
         >
           <ArrowBigLeft size={20} />
           Back
-        </div>
-        <div className="font-semibold text-3xl ">Parameters To Redact</div>
-        <Checkbox.Group
-          options={options}
-          onChange={handleCheckboxChange}
-          className="flex-col items-center"
-          rootClassName="grid grid-cols-2 w-full my-4 gap-2"
+        </Btn>
+        <div className="font-semibold text-3xl mb-3">Parameters To Redact</div>
+
+        <Collapse
+          className=""
+          items={options.map((option) => ({
+            key: option.category,
+            label: option.category,
+            children: (
+              <Checkbox.Group
+                rootClassName=""
+                value={selectedValues.filter((value) =>
+                  option.items.includes(value)
+                )}
+                onChange={(checkedValues) =>
+                  handleCheckboxChange(checkedValues, option.category)
+                }
+                className=""
+              >
+                {option.items.map((item) => (
+                  <Tooltip
+                    key={item}
+                    title={tooltips[item]}
+                    className="flex items-center"
+                  >
+                    <Checkbox value={item}>{item}</Checkbox>
+                  </Tooltip>
+                ))}
+              </Checkbox.Group>
+            ),
+          }))}
         />
-        {/* Button to save selected values */}
+
         <button
           className={`px-4 py-2 bg-black cursor-pointer text-white w-full rounded-md mt-4 font-semibold text-base hover:opacity-80 ${
             loaderState && "bg-gray-600 cursor-not-allowed"

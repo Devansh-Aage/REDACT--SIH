@@ -34,7 +34,6 @@ const SavedFiles = () => {
         const response = await res.data;
         if (response.success) {
           setUserFiles(response.files);
-          
         }
       } catch (error) {
         console.error(error, "Error while fetching user files");
@@ -47,9 +46,9 @@ const SavedFiles = () => {
     getUserFiles();
   }, [token]);
 
-  const handleFileClick=(cid)=>{
+  const handleFileClick = (cid) => {
     navigate(`/file/${cid}`);
-  }
+  };
 
   return (
     <div>
@@ -57,14 +56,18 @@ const SavedFiles = () => {
         Saved Files
       </div>
       <div className="flex items-center justify-evenly gap-6 flex-wrap">
-        {userFiles.map((file) => (
-          <div key={file._id} onClick={() => handleFileClick(file.ipfsCID)}>
-            {fileLoadingState && (
-              <Skeleton.Image active className="w-64 h-64 mt-6" />
-            )}
-            <FileCard file={file} />
-          </div>
-        ))}
+        {userFiles.length>0 ? (
+          userFiles.map((file) => (
+            <div key={file._id} onClick={() => handleFileClick(file.ipfsCID)}>
+              {fileLoadingState && (
+                <Skeleton.Image active className="w-64 h-64 mt-6" />
+              )}
+              <FileCard file={file} />
+            </div>
+          ))
+        ) : (
+          <div className="mt-10 text-xl font-semibold">No Files Saved in Cloud</div>
+        )}
       </div>
     </div>
   );

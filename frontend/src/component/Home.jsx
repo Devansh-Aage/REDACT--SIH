@@ -81,9 +81,9 @@ function Home() {
   }
 
   return (
-    <div className="flex items-center justify-center h-[85vh] w-full px-10">
+    <div className="flex items-center justify-center overflow-y-hidden h-[85vh] w-full px-10">
       <Dragger {...uploadProps} className="w-full h-full">
-        <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+        <p className="ant-upload-drag-icon"><InboxOutlined  /></p>
         <p className="ant-upload-text">
           Click or drag file to this area to upload
         </p>

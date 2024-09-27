@@ -1,9 +1,17 @@
 #root {
-  /* max-width: 1280px; */
   margin: 0 auto;
   padding: 0;
   text-align: center;
 }
+
+.ant-checkbox-group{
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+grid-gap: 10px;
+align-content: center;
+justify-content: center;
+}
+
 
 .loader {
   animation: rotate 1s infinite;
@@ -96,9 +104,6 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
 
 .read-the-docs {
   color: #888;

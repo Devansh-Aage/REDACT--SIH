@@ -3,10 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal, Form, Input, Table } from "antd";
 import { toast } from "react-toastify";
 import getEmp from "../helper/getEmp";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const token = localStorage.getItem("token");
-
+  const navigate=useNavigate();
   const [org, setOrg] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
@@ -75,9 +76,11 @@ const AdminDashboard = () => {
       title: "Activity",
       dataIndex: "activity",
       key: "_id",
-      render: () => {
+      render: (text,record) => {
+        console.log(record);
+        
         return (
-          <button className="bg-black px-4 py-2 font-semibold text-white rounded-lg">
+          <button onClick={()=>navigate(`/emp-audit/${record._id}`,{state:{empname:record.name}})} className="bg-black px-4 py-2 font-semibold text-white rounded-lg">
             Audit
           </button>
         );
@@ -115,20 +118,19 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="w-full p-6">
-      {org && <h1 className="text-xl font-bold mb-4">{org.name}</h1>}
+    <div className="w-full p-6 px-10">
+      {org && <h1 className="text-3xl font-bold mb-4 text-left">{org.name}</h1>}
 
       <div className="flex justify-start gap-4 mt-4">
-        <Button type="primary" onClick={openModal}>
+        <button className="bg-black text-white rounded-lg px-3 py-1 hover:opacity-90" onClick={openModal}>
           Add Employee
-        </Button>
-        <Button
-          type="primary"
+        </button>
+        <button
+          className="bg-slate-800 text-white rounded-lg px-3 py-1 hover:opacity-90"
           onClick={() => setIsAdminModalOpen(true)}
-          style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
         >
           Add Admin
-        </Button>
+        </button>
       </div>
 
       {/* Modal for Add Employee/Admin */}

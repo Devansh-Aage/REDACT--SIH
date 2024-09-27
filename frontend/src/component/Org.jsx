@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import Btn from "./ui/Btn";
 
 const Org = () => {
   const token = localStorage.getItem("token");
@@ -65,8 +66,12 @@ const Org = () => {
   }, [authToken]);
 
   return (
-    <div className="flex items-center justify-center w-full ">
-      <div className="bg-white p-8 rounded-lg shadow-lg  mt-20">
+    <div className="flex items-center justify-between w-full h-full pt-20 px-20">
+      <div className="w-[40%] ">
+        <img src="/org.png" className="w-full" alt="" />
+      </div>
+      <div className="bg-white p-8 rounded-lg shadow-md ">
+        <div className="font-bold text-2xl my-4 mb-7">Organization Name</div>
         <div className="flex items-center gap-3 my-4">
           <label htmlFor="orgName">Organization Name:</label>
           <Input
@@ -77,13 +82,12 @@ const Org = () => {
             style={{ width: 300 }}
           />
         </div>
-        <button
+        <Btn
           onClick={() => handleClick()}
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors duration-300"
         >
           Submit
-        </button>
+        </Btn>
       </div>
     </div>
   );
