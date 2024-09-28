@@ -15,34 +15,34 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
   const rawMimeType = uploadedFile?.type;
   const mimeType = rawMimeType.split("/")[1];
   const navigate = useNavigate();
-  console.log(selectedValues);
 
   const fileType = extractFileType(fileData);
 
   const options = [
     {
       category: "General",
-      items: ["Person", "Age", "Date", "Time", "Phone", "Email", "Location"],
+      items: ["PERSON", "AGE", "DATE", "TIME", "PHONE", "EMAIL", "LOCATION"],
     },
     {
       category: "Medical",
-      items: [ "Health", "Medication"],
+      items: ["HEALTH", "MEDICATION"],
     },
     {
       category: "Legal",
-      items: ["Organization", "Crime"],
+      items: ["ORGANIZATION", "CRIME"],
     },
     {
       category: "Finance",
       items: [
-        "Organization",
+        "ORGANIZATION",
         "GPE",
-        "Aadhar Number",
-        "Credit Card",
-        "PAN Number",
+        "AADHAR NUMBER",
+        "CREDIT CARD",
+        "PAN NUMBER",
       ],
     },
   ];
+  
 
   const tooltips = {
     Person: "Person Name",
@@ -83,6 +83,8 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
       form.append("file", fileData);
       form.append("entities", selectedValues);
       form.append("filename", fileName);
+      console.log(form.entities);
+      
       if (fileType === "application/pdf") {
         const res = await axios.post("http://localhost:5000/redact_pdf", form);
         const data = await res.data;
