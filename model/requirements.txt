@@ -8,3 +8,4 @@ spacy
 PyMuPDF
 flask
 textacy
+langdetect
