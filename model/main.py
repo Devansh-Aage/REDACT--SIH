@@ -88,7 +88,7 @@ def redact_video_route():
 # Route to handle image redaction
 @app.route('/redact_image', methods=['POST'])
 def redact_image_route():
-    global image_redacted_words
+    global image_redacted_words,image_redacted_faces
     data = request.form
 
     if 'file' not in data or 'filename' not in data or 'entities' not in data:
@@ -103,7 +103,10 @@ def redact_image_route():
 
     # Redact the image
     redacted_image_path, redacted_words, redacted_faces = redact_image_entities(file_path, entities)
+    image_redacted_words = redacted_words
     image_redacted_faces = redacted_faces
+    print(image_redacted_faces)
+    print(image_redacted_words)
     # Read the redacted image and encode it in base64
     redacted_image_base64 = encode_file_to_base64(redacted_image_path)
 
@@ -128,6 +131,7 @@ def confirm_image_redaction():
     filename = data.get('filename', 'image.jpg')
 
     file_path = decode_base64_to_file(file, filename)
+    print(image_redacted_words)
     print(image_redacted_words)
     final_image_path = redact_image_with_black_fill(file_path,image_redacted_words, exclude_words, image_redacted_faces)
 

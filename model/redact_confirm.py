@@ -5,45 +5,46 @@ from utils import UPLOAD_FOLDER,REDACTED_FOLDER, nlp, face_cascade
 
 
 # Redact image with black fill using stored global variables
-def redact_image_with_black_fill(image_path,image_redacted_words, exclude_words,face_dict, include_face=['face_1']):
+def redact_image_with_black_fill(image_path, image_redacted_words, exclude_words, face_dict, include_face=['face_1']):
     print("Start OCR")
+    
+    # Load the image and convert to grayscale
     image = cv2.imread(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Extract text data from the image using pytesseract
     data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
     print("End OCR")
     
+    # Filter out words that should not be redacted
     redacted_words = [word for word in image_redacted_words if word not in exclude_words]
-    # Black-fill the full entity
+    
+    # Redact each individual word by filling with black
     n_boxes = len(data['text'])
     for word in redacted_words:
-        word_parts = word.split()  # Split the entity into words (for matching)
-        word_parts = [part.strip(string.punctuation) for part in word_parts]  # Strip punctuation from entity parts
-        # Find all the boxes that correspond to the entity
-        boxes = []
+        word_parts = word.split()  # Split the entity into individual words
+        word_parts = [part.strip(string.punctuation) for part in word_parts]  # Clean word parts of punctuation
+        
         for i in range(n_boxes):
             if int(data['conf'][i]) > 60:
-                text = data['text'][i].strip(string.punctuation)  # Strip punctuation from recognized text
-                if text in word_parts:  # Check if the word part matches
+                text = data['text'][i].strip(string.punctuation)  # Clean detected text
+                if text in word_parts:
+                    # Get box coordinates and fill with black
                     (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
-                    boxes.append((x, y, w, h))
-        
-        if boxes:
-            # Combine bounding boxes for multi-word entity
-            x_min = min([box[0] for box in boxes])
-            y_min = min([box[1] for box in boxes])
-            x_max = max([box[0] + box[2] for box in boxes])
-            y_max = max([box[1] + box[3] for box in boxes])
-            image = cv2.rectangle(image, (x_min-3, y_min-3), (x_max+3, y_max+3), (0, 0, 0), -1)
+                    image = cv2.rectangle(image, (x-3, y-3), (x+w+3, y+h+3), (0, 0, 0), -1)  # Fill with black
 
+    # Redact selected faces by filling with black
     for face_number in include_face:
         if face_number in face_dict:
             (x, y, w, h) = face_dict[face_number]
-            image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)  # Black out selected face
+            image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)  # Black out face
 
+    # Save the black-filled image
     black_fill_image_path = os.path.join(REDACTED_FOLDER, 'black_filled_' + os.path.basename(image_path))
     cv2.imwrite(black_fill_image_path, image)
     
     return black_fill_image_path
+
 
 
 # Redact PDF with black fill using the stored global variables
