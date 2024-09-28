@@ -26,7 +26,7 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
     },
     {
       category: "Medical",
-      items: ["Aadhar Number", "Health", "Medication"],
+      items: [ "Health", "Medication"],
     },
     {
       category: "Legal",
@@ -132,7 +132,7 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
       </div>
       <div className="mt-2 w-[30%]">
         <Btn
-        className="w-[100px] flex items-center gap-3"
+        className="w-[7rem] flex items-center gap-3"
           onClick={() => clearUploadedFile()}
         >
           <ArrowBigLeft size={20} />
@@ -162,7 +162,7 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
                     title={tooltips[item]}
                     className="flex items-center"
                   >
-                    <Checkbox value={item}>{item}</Checkbox>
+                    <Checkbox disabled={loaderState} value={item}>{item}</Checkbox>
                   </Tooltip>
                 ))}
               </Checkbox.Group>

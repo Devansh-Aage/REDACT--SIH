@@ -21,8 +21,7 @@ const Preview = () => {
 
   const [sensitiveWords, setSensitiveWords] = useState(sensWords);
   const [newWord, setNewWord] = useState("");
-  console.log(sensitiveWords);
-  // Function to remove a word from the state
+
   const removeWord = (wordToRemove) => {
     setSensitiveWords(sensitiveWords.filter((word) => word !== wordToRemove));
   };
@@ -94,7 +93,9 @@ const Preview = () => {
         <FileRenderer fileData={base64Data} fileMimeType={fileType} />
       </div>
       <div className=" py-4 w-[35%] flex flex-col px-16 h-full">
-        <div className="font-bold  text-lg text-start my-2">Sensitive Words</div>
+        <div className="font-bold  text-lg text-start my-2">
+          Sensitive Words
+        </div>
         <ul className="max-h-[400px] w-full overflow-y-auto">
           {sensitiveWords.map((word, index) => (
             <li
