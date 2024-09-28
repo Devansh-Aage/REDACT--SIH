@@ -9,9 +9,9 @@ const router = express.Router();
 router.post("/addaudit", fetchuser, async (req, res) => {
   try {
     let success = false;
-    const { cid, eventType,filename } = req.body;
+    const { cid, eventType, filename } = req.body;
     const userID = req.user.id;
-    const tx = await contract.recordEvent(userID, cid,filename, eventType);
+    const tx = await contract.recordEvent(userID, cid, filename, eventType);
     await tx.wait(); // Wait for the transaction to be confirmed
     console.log("Event recorded successfully.");
     success = true;
@@ -32,7 +32,7 @@ router.get("/getuseraudits", fetchuser, async (req, res) => {
       timestamp: Number(event.timestamp), // Convert BigInt to Number
       cid: event.cid,
       eventType: Number(event.eventType), // Convert enum to Number if necessary
-      filename:event.filename
+      filename: event.filename,
     }));
 
     const updatedEventsPromises = formattedEvents.map(async (event) => {
@@ -64,7 +64,9 @@ router.get("/getuseraudits", fetchuser, async (req, res) => {
 router.get("/get-employee-audits", checkAdmin, async (req, res) => {
   try {
     let success = false;
-    const { userId } = req.body;
+    const { userId } = req.query;
+
+
     const events = await contract.getEventsByUserID(userId);
 
     const formattedEvents = events.map((event) => ({

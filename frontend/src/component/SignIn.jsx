@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Cascader } from "antd";
 import axios from "axios";
+import Btn from "./ui/Btn";
 
 const options = [
   {
@@ -74,7 +75,10 @@ const SignIn = () => {
                 },
               });
             }
-            navigate("/home");
+            else{
+
+              navigate("/home");
+            }
             resolve(); // Resolve the promise if successful
           } else {
             reject(); // Reject the promise for an invalid credential
@@ -100,8 +104,11 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full mt-20">
+    <div className="flex items-center justify-around w-full h-full px-20">
+       <div className="w-[40%] ">
+        <img src="/login.png" className="w-full" alt="" />
+      </div>
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-[30%]">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">
           Sign In
         </h2>
@@ -156,12 +163,11 @@ const SignIn = () => {
               required
             />
           </div>
-          <button
+          <Btn
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors duration-300"
           >
             Sign In
-          </button>
+          </Btn>
         </form>
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">

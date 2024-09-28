@@ -3,7 +3,6 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import SignIn from "./component/SignIn";
 import SignUp from "./component/SignUp";
-import LandingPage from "./component/LandingPage";
 import Home from "./component/Home";
 import Preview from "./component/Preview";
 import Navbar from "./component/Navbar";
@@ -15,13 +14,13 @@ import SavedFiles from "./component/SavedFiles";
 import Audits from "./component/Audits";
 import Org from "./component/Org";
 import AdminDashboard from "./component/AdminDashboard";
+import EmpAudit from "./component/EmpAudit";
 
 function App() {
   return (
     <div className="w-full h-full">
       <Navbar/>
       <Routes>
-        {/* <Route path="/" element={<LandingPage />} /> */}
         <Route path="/" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/home" element={<Home />} />
@@ -33,6 +32,7 @@ function App() {
         <Route path="/org" element={<Org />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/file/:cid" element={<SavedFile />} />
+        <Route path="/emp-audit/:empId" element={<EmpAudit />} />
       </Routes>
       <ToastContainer draggable='mouse' />
     </div>
