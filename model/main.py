@@ -5,7 +5,7 @@ import pytesseract
 import spacy
 import fitz
 from flask_cors import CORS
-from utils import decode_base64_to_file,encode_file_to_base64,UPLOAD_FOLDER,REDACTED_FOLDER
+from utils import decode_base64_to_file,encode_file_to_base64,save_uploaded_file,UPLOAD_FOLDER,REDACTED_FOLDER
 from redact_preview import redact_image_entities,redact_pdf_entities
 from redact_confirm import redact_image_with_black_fill,redact_pdf_with_black_fill
 
@@ -50,7 +50,7 @@ def redact_faces_in_video(video_path):
         # Convert frame to grayscale for face detection
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-
+        print(faces)
         # Redact faces by applying black rectangles over them
         for (x, y, w, h) in faces:
             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 0), -1)
