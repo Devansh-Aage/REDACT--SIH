@@ -6,6 +6,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
+import Btn from "./ui/Btn";
 
 const Redacted = () => {
   const token = localStorage.getItem("token");
@@ -135,7 +136,6 @@ const Redacted = () => {
   };
 
   console.log(base64Data);
-  
 
   return (
     <div className="w-full flex h-full ">
@@ -144,20 +144,20 @@ const Redacted = () => {
       </div>
 
       <div className=" h-full mx-auto flex flex-col gap-6 mt-20">
-        <button
+        <Btn
+          className="font-semibold text-base flex items-center justify-center gap-2"
           onClick={() => setIsDownloadModalOpen(true)}
-          className="bg-black w-[17rem] hover:cursor-pointer font-semibold text-base shadow-md text-white px-3 py-2 rounded flex items-center justify-center gap-2"
         >
           <Download size={20} />
           Download file
-        </button>
-        <button
+        </Btn>
+        <Btn
           onClick={() => setIsModalOpen(true)}
-          className="bg-black w-[17rem] hover:cursor-pointer font-semibold text-base shadow-md text-white px-3 py-2 rounded flex items-center justify-center gap-2"
+          className="font-semibold text-base flex items-center justify-center gap-2"
         >
           <Cloud size={20} />
           Save in Cloud
-        </button>
+        </Btn>
       </div>
       <Modal
         title="Save File to Cloud"

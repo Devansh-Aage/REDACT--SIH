@@ -4,6 +4,7 @@ import { Button, Modal, Form, Input, Table } from "antd";
 import { toast } from "react-toastify";
 import getEmp from "../helper/getEmp";
 import { useNavigate } from "react-router-dom";
+import Btn from "./ui/Btn";
 
 const AdminDashboard = () => {
   const token = localStorage.getItem("token");
@@ -80,16 +81,15 @@ const AdminDashboard = () => {
         console.log(record);
 
         return (
-          <button
+          <Btn
             onClick={() =>
               navigate(`/emp-audit/${record._id}`, {
                 state: { empname: record.name },
               })
             }
-            className="bg-black px-4 py-2 font-semibold text-white rounded-lg"
           >
             Audit
-          </button>
+          </Btn>
         );
       },
     },
@@ -140,18 +140,17 @@ const AdminDashboard = () => {
       {org && <h1 className="text-3xl font-bold mb-4 text-left">{org.name}</h1>}
 
       <div className="flex justify-start gap-4 mt-4">
-        <button
-          className="bg-black text-white rounded-lg px-3 py-1 hover:opacity-90"
+        <Btn
+          // className="bg-black text-white rounded-lg px-3 py-1 hover:opacity-85"
           onClick={openModal}
         >
           Add Employee
-        </button>
-        <button
-          className="bg-slate-800 text-white rounded-lg px-3 py-1 hover:opacity-90"
+        </Btn>
+        <Btn
           onClick={() => setIsAdminModalOpen(true)}
         >
           Add Admin
-        </button>
+        </Btn>
       </div>
 
       {/* Modal for Add Employee/Admin */}
