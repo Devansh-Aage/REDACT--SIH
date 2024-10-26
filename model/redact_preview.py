@@ -74,15 +74,19 @@ def redact_pdf_entities(input_pdf_path, entities_to_redact):
         page = doc.load_page(page_num)
         full_text = page.get_text()
 
-        pdf_doc = nlp(full_text)
-        words_to_redact = []
-        
         for ent in pdf_doc.ents:
             if ent.label_ in entities_to_redact:
-                words_to_redact.append(ent.text)
-        
+                try:
+                    # Filter only English words
+                    if detect(ent.text) == 'en':
+                        words_to_redact.append(ent.text)
+                except LangDetectException:
+                    # Skip words that throw an error in language detection
+                    continue
+
         pdf_redacted_words.extend(words_to_redact)
-        
+
+        # Redact the found words in the PDF
         for word in words_to_redact:
             areas = page.search_for(word)
             for area in areas:
