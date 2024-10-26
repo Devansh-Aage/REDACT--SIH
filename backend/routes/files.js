@@ -51,8 +51,8 @@ router.post("/upload", fetchuser, async (req, res) => {
     let formData = new FormData();
     let success = false;
     const { base64Data, mimeType, filename } = req.body;
-
-    const buffer = Buffer.from(base64Data, "base64");
+    const base64WithoutPrefix = base64Data.replace(/^data:(.*?);base64,/, "");
+    const buffer = Buffer.from(base64WithoutPrefix, "base64");
     const encryptedBuffer = encryptFile(buffer, key);
 
     const encryptedbase64String = encryptedBuffer.toString("base64");

@@ -8,7 +8,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
-  console.log(pathname);
   const token = localStorage.getItem("token");
 
   const logout = () => {
@@ -17,13 +16,13 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const notAllowedRoutes = ["/", "/signup", "/org"];
+
   const role = getRole(token);
 
   return (
     <nav
-      className={`${
-        pathname === "/org" && "hidden"
-      } bg-gray-800 text-white py-2 px-6 flex w-[60%] rounded-3xl shadow-lg mx-auto mb-4 mt-2 justify-between items-center`}
+      className={`${notAllowedRoutes.includes(pathname) && "hidden"} bg-gray-800 text-white py-2 px-6 flex w-[60%] rounded-3xl shadow-lg mx-auto mb-4 mt-2 justify-between items-center`}
     >
       <div className="flex items-center">
         <a href="/home" className="text-xl font-semibold">

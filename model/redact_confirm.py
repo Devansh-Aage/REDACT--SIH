@@ -17,7 +17,7 @@ def redact_image_with_black_fill(image_path, image_redacted_words, exclude_words
     print("End OCR")
     
     # Filter out words that should not be redacted
-    redacted_words = [word for word in image_redacted_words if word not in exclude_words]
+    redacted_words = [word for word in image_redacted_words if word in exclude_words]
     
     # Redact each individual word by filling with black
     n_boxes = len(data['text'])

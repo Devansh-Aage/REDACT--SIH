@@ -104,7 +104,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-around w-full h-full px-20">
+    <div className="flex items-center justify-around w-full h-full px-20 mt-20">
        <div className="w-[40%] ">
         <img src="/login.png" className="w-full" alt="" />
       </div>
@@ -165,6 +165,7 @@ const SignIn = () => {
           </div>
           <Btn
             type="submit"
+            className='w-full'
           >
             Sign In
           </Btn>

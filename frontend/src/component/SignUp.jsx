@@ -96,11 +96,11 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex items-center justify-around w-full h-full px-20">
+    <div className="flex items-center justify-around w-full h-full px-20 mt-14">
       <div className="w-[40%] ">
         <img src="/signup.png" className="w-full" alt="" />
       </div>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-[30%] mt-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-[30%] ">
         <h2 className="text-3xl font-bold mb-6 text-gray-900 text-center">
           Sign Up
         </h2>
@@ -191,7 +191,7 @@ const SignUp = () => {
           </div>
           <Btn
             type="submit"
-            className=""
+            className='w-full'
           >
             Sign Up
           </Btn>

@@ -40,6 +40,8 @@ const Org = () => {
       }
     } catch (error) {
       toast.error("Something went wrong");
+      console.log(error);
+      
     }
   };
 
@@ -63,7 +65,7 @@ const Org = () => {
       }
     };
     checkIfOrg();
-  }, [authToken]);
+  }, []);
 
   return (
     <div className="flex items-center justify-between w-full h-full pt-20 px-20">
@@ -85,6 +87,7 @@ const Org = () => {
         <Btn
           onClick={() => handleClick()}
           type="submit"
+          className="w-full"
         >
           Submit
         </Btn>

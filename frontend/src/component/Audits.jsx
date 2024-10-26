@@ -1,28 +1,64 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { toast } from "react-toastify";
-import { Table, Input } from "antd";
-import "antd/dist/reset.css";
+import { Table, Input, Button } from "antd";
+import Btn from "./ui/Btn";
 
 const { Search } = Input;
 
+const CACHE_KEY = "audits_cache";
+const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 const Audits = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    navigate("/login");
-  }
-
   const [audits, setAudits] = useState([]);
   const [filteredAudits, setFilteredAudits] = useState([]);
-  const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const getAudits = async () => {
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
+
+  const getCachedAudits = () => {
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      const { timestamp, data } = JSON.parse(cachedData);
+      if (Date.now() - timestamp < CACHE_EXPIRATION) {
+        return data;
+      }
+    }
+    return null;
+  };
+
+  const setCachedAudits = (data) => {
+    const cacheData = {
+      timestamp: Date.now(),
+      data: data,
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+  };
+
+  const fetchAudits = useCallback(
+    async (forceRefresh = false) => {
+      if (!token) return;
+
+      if (!forceRefresh) {
+        const cachedAudits = getCachedAudits();
+        if (cachedAudits) {
+          setAudits(cachedAudits);
+          setFilteredAudits(cachedAudits);
+          return;
+        }
+      }
+
+      setLoading(true);
       try {
-        const getAuditFromBC = await axios.get(
+        const response = await axios.get(
           "http://localhost:3001/api/audit/getuseraudits",
           {
             headers: {
@@ -31,28 +67,37 @@ const Audits = () => {
           }
         );
 
-        const rawAudits = await getAuditFromBC.data;
-        setAudits(rawAudits?.updatedEvents);
-        setFilteredAudits(rawAudits?.updatedEvents);
+        const rawAudits = response.data?.updatedEvents || [];
+        setAudits(rawAudits);
+        setFilteredAudits(rawAudits);
+        setCachedAudits(rawAudits);
       } catch (error) {
         toast.error("Failed to fetch audits from blockchain");
+      } finally {
+        setLoading(false);
       }
-    };
+    },
+    [token]
+  );
 
-    getAudits();
-  }, [token]);
-
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
-    return date.toLocaleString(); // Converts to local date and time string
-  };
+  useEffect(() => {
+    fetchAudits();
+  }, [fetchAudits]);
 
   const handleSearch = (value) => {
-    setSearchText(value);
     const filtered = audits.filter((audit) =>
       audit.filename.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredAudits(filtered);
+  };
+
+  const handleRefresh = () => {
+    fetchAudits(true);
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
   };
 
   const columns = [
@@ -71,37 +116,36 @@ const Audits = () => {
       title: "Action",
       dataIndex: "eventType",
       key: "eventType",
-      render: (text) => {
-        return text === 0 ? (
-          <div className="bg-red-500 text-white p-1 w-[5rem] text-center rounded-md">
-            Redacted
-          </div>
-        ) : (
-          <div className="bg-blue-500 text-white p-1 w-[5rem] text-center rounded-md">
-            Accessed
-          </div>
-        );
-      },
+      render: (text) => (
+        <div
+          className={`${
+            text === 0 ? "bg-red-500" : "bg-blue-500"
+          } text-white p-1 w-20 text-center rounded-md`}
+        >
+          {text === 0 ? "Redacted" : "Accessed"}
+        </div>
+      ),
     },
   ];
 
   return (
     <div className="w-full h-full">
       <div className="w-full flex items-center justify-between mx-auto px-20 mt-6 mb-5">
-        <div className="font-semibold text-3xl">
-          Access Audits
-        </div>
+        <div className="font-semibold text-3xl">Access Audits</div>
         <Search
           placeholder="Search by filename"
           onSearch={handleSearch}
           enterButton
-          style={{ marginBottom: 16, width: "300px" }}
+          style={{ width: "300px" }}
         />
+        <Btn onClick={handleRefresh} loading={loading}>
+          Refresh Audits
+        </Btn>
       </div>
       <Table
         dataSource={filteredAudits}
         columns={columns}
-        rowKey="cid"
+        rowKey="timestamp"
         className="px-20"
         pagination={false}
       />

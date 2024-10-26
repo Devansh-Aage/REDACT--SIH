@@ -16,7 +16,7 @@ function Home() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/signin");
+      navigate("/");
       toast.error("Please Login First");
     }
   }, [token])

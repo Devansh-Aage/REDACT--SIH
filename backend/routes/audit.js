@@ -66,7 +66,6 @@ router.get("/get-employee-audits", checkAdmin, async (req, res) => {
     let success = false;
     const { userId } = req.query;
 
-
     const events = await contract.getEventsByUserID(userId);
 
     const formattedEvents = events.map((event) => ({

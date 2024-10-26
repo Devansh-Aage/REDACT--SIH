@@ -134,8 +134,8 @@ const UploadFile = ({ uploadedFile, fileData, fileName }) => {
       </div>
       <div className="mt-2 w-[30%]">
         <Btn
-        className="w-[7rem] flex items-center gap-3"
-          onClick={() => clearUploadedFile()}
+        className="w-[7rem] flex items-center  gap-3"
+          onClick={()=>clearUploadedFile()}
         >
           <ArrowBigLeft size={20} />
           Back

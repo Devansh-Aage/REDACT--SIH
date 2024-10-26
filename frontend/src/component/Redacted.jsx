@@ -96,7 +96,7 @@ const Redacted = () => {
         {
           cid: "",
           eventType: 0,
-          filename: fileName,
+          filename: DownloadfileName,
         },
         {
           headers: {
@@ -133,6 +133,9 @@ const Redacted = () => {
     }
     return new Blob(byteArrays, { type: mimeType });
   };
+
+  console.log(base64Data);
+  
 
   return (
     <div className="w-full flex h-full ">

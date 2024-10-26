@@ -7,6 +7,9 @@ import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 const FileRenderer = ({ fileMimeType, fileData }) => {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
+// console.log(fileMimeType);
+// console.log(fileData);
+
 
   return (
     <>

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const token = localStorage.getItem("token");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [org, setOrg] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
@@ -76,19 +76,24 @@ const AdminDashboard = () => {
       title: "Activity",
       dataIndex: "activity",
       key: "_id",
-      render: (text,record) => {
+      render: (text, record) => {
         console.log(record);
-        
+
         return (
-          <button onClick={()=>navigate(`/emp-audit/${record._id}`,{state:{empname:record.name}})} className="bg-black px-4 py-2 font-semibold text-white rounded-lg">
+          <button
+            onClick={() =>
+              navigate(`/emp-audit/${record._id}`, {
+                state: { empname: record.name },
+              })
+            }
+            className="bg-black px-4 py-2 font-semibold text-white rounded-lg"
+          >
             Audit
           </button>
         );
       },
     },
   ];
-
-
 
   const addEmp = async () => {
     try {
@@ -109,6 +114,19 @@ const AdminDashboard = () => {
       const data = res.data;
       if (data.success) {
         toast.success("Employee added successfully");
+        const res = await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/api/mail/send-emp-mail`,
+          {
+            email: form.getFieldValue("email"),
+            password: form.getFieldValue("password"),
+          },
+          {
+            headers: {
+              "auth-token": token,
+            },
+          }
+        );
+        const data = res.data();
       }
     } catch (error) {
       console.log(error);
@@ -122,7 +140,10 @@ const AdminDashboard = () => {
       {org && <h1 className="text-3xl font-bold mb-4 text-left">{org.name}</h1>}
 
       <div className="flex justify-start gap-4 mt-4">
-        <button className="bg-black text-white rounded-lg px-3 py-1 hover:opacity-90" onClick={openModal}>
+        <button
+          className="bg-black text-white rounded-lg px-3 py-1 hover:opacity-90"
+          onClick={openModal}
+        >
           Add Employee
         </button>
         <button
