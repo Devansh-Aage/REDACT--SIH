@@ -32,7 +32,7 @@ REDACTRONIX achieved a top 6 position among over 100 teams working on the same p
 - [@devanshaage](https://github.com/Devansh-Aage)
 - [@aakashpandey](https://github.com/AakashHubGit)
 - [@sidheshsahu](https://github.com/sidheshsahu)
-- [@gargibendale](https://github.com/Devansh-Aage)
+- [@gargibendale](https://github.com/gargibendale)
 - [@kumailp](https://github.com/kumail-tech-21)
 - [@niravpatel](https://github.com/NiravHubGit)
 
