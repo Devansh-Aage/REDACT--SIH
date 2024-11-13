@@ -1,21 +1,15 @@
 require("dotenv").config();
 const multer = require("multer");
-const axios = require("axios");
 const express = require("express");
 const crypto = require("crypto");
-const fs = require("fs/promises");
-const syncFS = require("fs");
-const path = require("path");
 const File = require("../models/File.js");
 const FormData = require("form-data");
-const stream = require("stream");
 const fetchuser = require("../middleware/fetchuser.js");
 const { PinataSDK } = require("pinata");
 
 const router = express.Router();
 
 const JWT = process.env.PINATA_JWT;
-const API = process.env.PINATA_API;
 const pinataGateway = process.env.PINATA_GATEWAY;
 
 const pinata = new PinataSDK({
@@ -23,8 +17,6 @@ const pinata = new PinataSDK({
   pinataGateway: pinataGateway,
 });
 
-// Configure multer to save files to disk
-const upload = multer({ dest: "./uploads/" });
 
 const encryptFile = (buffer, key) => {
   const cipher = crypto.createCipheriv("aes-256-cbc", key, key.slice(0, 16));
@@ -48,7 +40,6 @@ router.post("/upload", fetchuser, async (req, res) => {
   const key = crypto.randomBytes(32);
 
   try {
-    let formData = new FormData();
     let success = false;
     const { base64Data, mimeType, filename } = req.body;
     const base64WithoutPrefix = base64Data.replace(/^data:(.*?);base64,/, "");
